@@ -6,7 +6,7 @@
 /*   By: jmenezes <jmenezes@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/07/25 18:16:42 by jmenezes          #+#    #+#             */
-/*   Updated: 2022/07/25 18:17:20 by jmenezes         ###   ########.fr       */
+/*   Updated: 2022/07/31 00:11:00 by jmenezes         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,88 +14,64 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-char	*ft_strchr(const char *str, int c)
-{
-	while (1)
-	{
-		if ((unsigned char)*str == (unsigned char)c)
-			return ((char *)str);
-		if (*str == '\0')
-			return (NULL);
-		str++;
-	}
-}
+void	*ft_memmove(void *dst, const void *src, size_t n);
+char	*ft_strchr(const char *str, int c);
+char	*ft_strjoin(const char *str1, const char *str2);
+size_t	ft_strlcpy(char *dst, const char *src, size_t size);
+size_t	ft_strlen(const char *str);
 
-char	*strnjoin(const char *str1, const char *str2, size_t str2len)
+int	read_buffer_line(char **str, char *buffer)
 {
-	char	*jstr;
-	size_t	str1len;
-	size_t	i;
-
-	str1len = 0;
-	if (str1 != NULL)
-		while (str1[str1len] != '\0')
-			str1len++;
-	jstr = malloc(str1len + str2len + 1);
-	if (jstr == NULL)
-		return (NULL);
-	i = 0;
-	while (i < str1len)
-	{
-		jstr[i] = str1[i];
-		i++;
-	}
-	i = 0;
-	while (i < str2len)
-	{
-		jstr[i + str1len] = str2[i];
-		i++;
-	}
-	jstr[str1len + str2len] = '\0';
-	return (jstr);
-}
-
-size_t	get_line(char **str, const char *buffer, size_t buflen)
-{
-	char	*lf;
+	char	*line;
+	size_t	lnlen;
 	char	*tmp;
-	size_t	n;
 
-	lf = ft_strchr(buffer, '\n');
-	if (lf == NULL)
-		n = buflen;
+	tmp = ft_strchr(buffer, '\n');
+	if (tmp != NULL)
+		lnlen = tmp - buffer + 1;
 	else
-		n = lf - buffer + 1;
-	tmp = strnjoin(*str, buffer, n);
-	free(*str);
-	*str = tmp;
-	return (n);
+		lnlen = ft_strlen(buffer);
+	tmp = *str;
+	line = malloc(lnlen + 1);
+	if (line != NULL)
+	{
+		ft_strlcpy(line, buffer, lnlen + 1);
+		*str = line;
+		if (tmp != NULL)
+		{
+			*str = ft_strjoin(tmp, line);
+			free(line);
+		}
+		if (*str != NULL)
+			ft_memmove(buffer, buffer + lnlen, ft_strlen(buffer) - lnlen + 1);
+	}
+	free(tmp);
+	return (*str != NULL && ft_strchr(*str, '\n') != NULL);
 }
 
 char	*get_next_line(int fd)
 {
-	static char		buffer[BUFFER_SIZE];
-	static ssize_t	buflen;
-	static size_t	bufidx;
-	char			*str;
+	static char	buffer[BUFFER_SIZE + 1];
+	ssize_t		n;
+	char		*str;
 
 	str = NULL;
 	while (1)
 	{
-		if (bufidx == (size_t)buflen)
+		if (ft_strlen(buffer) == 0)
 		{
-			bufidx = 0;
-			buflen = read(fd, buffer, sizeof(buffer));
-			if (buflen == 0)
-				break ;
-			if (buflen == -1)
+			n = read(fd, buffer, BUFFER_SIZE);
+			if (n == -1)
 			{
+				buffer[0] = '\0';
 				free(str);
 				return (NULL);
 			}
+			buffer[n] = '\0';
+			if (n == 0)
+				break ;
 		}
-		bufidx += get_line(&str, buffer + bufidx, (size_t)buflen - bufidx);
-		if (str == NULL || ft_strchr(str, '\n') != NULL)
+		if (read_buffer_line(&str, buffer) || str == NULL)
 			break ;
 	}
 	return (str);
