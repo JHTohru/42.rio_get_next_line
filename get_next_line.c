@@ -6,7 +6,7 @@
 /*   By: jmenezes <jmenezes@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/07/25 18:16:42 by jmenezes          #+#    #+#             */
-/*   Updated: 2022/07/31 02:57:00 by jmenezes         ###   ########.fr       */
+/*   Updated: 2022/07/31 11:41:00 by jmenezes         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,9 @@ char	*ft_strjoin(const char *str1, const char *str2);
 size_t	ft_strlcpy(char *dst, const char *src, size_t size);
 size_t	ft_strlen(const char *str);
 
+// write_buffer() fills buffer with the contents of an open file and terminates
+// it with a NUL character. write_buffer() frees *str and set it to NULL if any
+// read error occurs.
 static ssize_t	write_buffer(int fd, char **str, char *buffer)
 {
 	ssize_t	rcnt;
@@ -35,6 +38,9 @@ static ssize_t	write_buffer(int fd, char **str, char *buffer)
 	return (rcnt);
 }
 
+// read_buffer() appends a line from buffer to *str, which can be NULL. If no
+// line feed character is found in the buffer, all the buffer contents are moved
+// to *str.
 static void	read_buffer(char **str, char *buffer)
 {
 	char	*line;
@@ -63,6 +69,10 @@ static void	read_buffer(char **str, char *buffer)
 	free(tmp);
 }
 
+// get_next_line() returns the next line from an open file for the given fd.
+// It returns NULL if there is no more bytes to be read or any error occurs.
+// get_next_line() can handle only a file at a time. get_next_line() must fully
+// one file or get some read error in order to propertly handle another file.
 char	*get_next_line(int fd)
 {
 	static char	buffer[BUFFER_SIZE + 1];
