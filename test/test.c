@@ -169,6 +169,8 @@ void	ft_putescapedstr(char *str)
 				break ;
 			case '"':
 				printf("\\\"");
+			case '\\':
+				printf("\\\\");
 				break ;
 			default:
 				printf("%c", str[i]);
