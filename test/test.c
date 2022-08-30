@@ -6,10 +6,24 @@
 #include <string.h>
 #include <unistd.h>
 
-void	*(*system_malloc)(size_t) = NULL;
-void	(*system_free)(void *) = NULL;
+void	*(*sys_malloc)(size_t) = NULL;
+void	(*sys_free)(void *) = NULL;
 int		alloc_cnt = 0;
 int		free_cnt = 0;
+
+void	*system_malloc(size_t size)
+{
+	if (sys_malloc == NULL)
+		sys_malloc = dlsym(RTLD_NEXT, "malloc");
+	return sys_malloc(size);
+}
+
+void	system_free(void *s)
+{
+	if (sys_free == NULL)
+		sys_free = dlsym(RTLD_NEXT, "free");
+	sys_free(s);
+}
 
 void	*malloc(size_t size)
 {
@@ -188,9 +202,6 @@ int	main(int argc, char *argv[])
 	int		i;
 	t_node	*fdslst;
 	FILE	*fl_want;
-
-	system_malloc = dlsym(RTLD_NEXT, "malloc");
-	system_free = dlsym(RTLD_NEXT, "free");
 
 	if (argc < 3)
 	{
