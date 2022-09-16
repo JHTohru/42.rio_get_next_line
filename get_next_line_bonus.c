@@ -6,7 +6,7 @@
 /*   By: jmenezes <jmenezes@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/07/25 18:16:42 by jmenezes          #+#    #+#             */
-/*   Updated: 2022/07/31 11:36:04 by jmenezes         ###   ########.fr       */
+/*   Updated: 2022/09/15 00:33:58 by jmenezes         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ static char	*get_buffer(t_buffer_list **lst, int fd)
 		curr->fd = fd;
 		curr->buffer = malloc(BUFFER_SIZE + 1);
 		curr->buffer[0] = '\0';
+		curr->next = NULL;
 		if (prev == NULL)
 			*lst = curr;
 		else
@@ -85,7 +86,7 @@ static ssize_t	write_buffer(int fd, char **str, char *buffer)
 	rcnt = read(fd, buffer, BUFFER_SIZE);
 	if (rcnt >= 0)
 		buffer[rcnt] = '\0';
-	else if (rcnt == -1)
+	else if (rcnt < 0)
 	{
 		free(str);
 		*str = NULL;
