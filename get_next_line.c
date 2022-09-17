@@ -32,7 +32,7 @@ static ssize_t	write_buffer(int fd, char **str, char *buffer)
 		buffer[rcnt] = '\0';
 	else if (rcnt == -1)
 	{
-		free(str);
+		free(*str);
 		*str = NULL;
 	}
 	return (rcnt);
